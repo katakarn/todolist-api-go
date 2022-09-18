@@ -11,15 +11,30 @@ db.createUser({
 // createIndex 
 // db.users.createIndex({ username: 1 }, { unique: true });
 
-db.users.insertMany([
+db.todos.insertMany([
+    // {
+    //     username: "admin",
+    //     password: "admin",
+    //     role: "admin"
+    // },
+    // {
+    //     username: "user",
+    //     password: "user",
+    //     role: "user"
+    // },
     {
-        username: "admin",
-        password: "admin",
-        role: "admin"
+        title: "test1",
+        description: "des1",
+        isDone: false,
     },
     {
-        username: "user",
-        password: "user",
-        role: "user"
+        title: "test2",
+        description: "des2",
+        isDone: false,
+    },
+    {
+        title: "test3",
+        description: "des3",
+        isDone: false,
     }
 ])

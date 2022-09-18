@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"context"
+	"time"
 
+	"github.com/katakarn/todolist-api-go/todo"
 	"github.com/labstack/echo/v4"
 
+	// "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -21,7 +24,7 @@ func InitMongoDB(ctx context.Context) *DB {
 	// "mongodb://root:password@localhost:27017".
 	credential := options.Credential{
 		AuthMechanism: "SCRAM-SHA-1",
-		AuthSource:    "test",
+		AuthSource:    "todolist",
 		Username:      "root",
 		Password:      "password",
 	}
@@ -40,64 +43,24 @@ func InitMongoDB(ctx context.Context) *DB {
 }
 
 func main() {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	db := InitMongoDB(ctx)
+	defer func() {
+		if err := db.Client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
+
+	mongodb := db.Client.Database("todolist")
+
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
+	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/users", getAllUser)
-	e.GET("/users/:id", getUserById)
-	e.POST("/users", saveUser)
-	e.PUT("/users/:id", updateUser)
-	e.DELETE("/users/:id", deleteUser)
+	e.GET("/todos/:todo", todo.GetTodoHandler(todo.GetAllTodo(mongodb)))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
-
-func getAllUser(c echo.Context) error {
-	// Get user from database
-	return c.String(http.StatusOK, "User")
-}
-
-// func GetUserByUsername(db *mongo.Database) func(context.Context, string) (*User, error) {
-// 	return func(ctx context.Context, username string) (*User, error) {
-// 		collection := getUsersCollection(db)
-// 		filter := bson.M{"username": username}
-// 		var user User
-// 		if err := collection.FindOne(ctx, filter).Decode(&user); err != nil {
-// 			return nil, err
-// 		}
-// 		return &user, nil
-// 	}
-// }
-
-// e.GET("/users/:id", getUser)
-func getUserById(c echo.Context) error {
-	// User ID from path `users/:id`
-	id := c.Param("id")
-	return c.String(http.StatusOK, id)
-}
-
-func saveUser(c echo.Context) error {
-	// Save user to database
-	return c.String(http.StatusCreated, "User created")
-}
-
-func updateUser(c echo.Context) error {
-	// Update user in database
-	return c.String(http.StatusOK, "User updated")
-}
-
-func deleteUser(c echo.Context) error {
-	// Delete user from database
-	return c.String(http.StatusOK, "User deleted")
-}
-
-// Run the server
-// $ go run main.go
-
-// Test the server
-// $ curl -i http://localhost:1323
-// $ curl -i http://localhost:1323/users/1
-// $ curl -i -X POST http://localhost:1323/users
-// $ curl -i -X PUT http://localhost:1323/users/1
-// $ curl -i -X DELETE http://localhost:1323/users/1
