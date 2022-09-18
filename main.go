@@ -9,7 +9,6 @@ import (
 	"github.com/katakarn/todolist-api-go/todo"
 	"github.com/labstack/echo/v4"
 
-	// "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -60,7 +59,8 @@ func main() {
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/todos/:todo", todo.GetTodoHandler(todo.GetAllTodo(mongodb)))
+	e.GET("/todos/:todo", todo.GetTodoByIdHandler(todo.GetTodoById(mongodb)))
+	e.GET("/todos", todo.GetAllTodoHandler(todo.GetAllTodo(mongodb)))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
