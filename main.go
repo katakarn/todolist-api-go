@@ -9,6 +9,7 @@ import (
 	"github.com/katakarn/todolist-api-go/todo"
 	"github.com/labstack/echo/v4"
 
+	"github.com/labstack/echo/v4/middleware"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -56,11 +57,21 @@ func main() {
 	mongodb := db.Client.Database("todolist")
 
 	e := echo.New()
+
+	corsConfig := middleware.CORSConfig{
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
+	}
+
+	e.Use(middleware.CORSWithConfig(corsConfig))
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 	e.GET("/todos/:todo", todo.GetTodoByIdHandler(todo.GetTodoById(mongodb)))
 	e.GET("/todos", todo.GetAllTodoHandler(todo.GetAllTodo(mongodb)))
+	e.POST("/todos", todo.CreateTodoHandler(todo.CreateTodo(mongodb)))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
