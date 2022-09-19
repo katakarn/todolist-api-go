@@ -72,6 +72,7 @@ func main() {
 	e.GET("/todos/:todo", todo.GetTodoByIdHandler(todo.GetTodoById(mongodb)))
 	e.GET("/todos", todo.GetAllTodoHandler(todo.GetAllTodo(mongodb)))
 	e.POST("/todos", todo.CreateTodoHandler(todo.CreateTodo(mongodb)))
+	e.PUT("/todos", todo.UpdateTodoHandler(todo.UpdateTodoById(mongodb)))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
