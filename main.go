@@ -22,14 +22,15 @@ type DB struct {
 func InitMongoDB(ctx context.Context) *DB {
 	// To configure auth via URI instead of a Credential, use
 	// "mongodb://root:password@localhost:27017".
-	credential := options.Credential{
-		AuthMechanism: "SCRAM-SHA-1",
-		AuthSource:    "todolist",
-		Username:      "root",
-		Password:      "password",
-	}
+	// credential := options.Credential{
+	// 	AuthMechanism: "SCRAM-SHA-1",
+	// 	AuthSource:    "todolist",
+	// 	Username:      "root",
+	// 	Password:      "password",
+	// }
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credential))
+	// client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credential))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		panic(err)
@@ -73,6 +74,10 @@ func main() {
 	e.GET("/todos", todo.GetAllTodoHandler(todo.GetAllTodo(mongodb)))
 	e.POST("/todos", todo.CreateTodoHandler(todo.CreateTodo(mongodb)))
 	e.PUT("/todos", todo.UpdateTodoHandler(todo.UpdateTodoById(mongodb)))
+
+	e.GET("/todos/test", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

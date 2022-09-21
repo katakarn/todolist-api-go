@@ -15,7 +15,7 @@ func UpdateTodoById(db *mongo.Database) func(context.Context, Todo) error {
 		rs, err := collection.UpdateOne(ctx, filter, bson.M{"$set": todo})
 
 		if rs.ModifiedCount == 0 {
-			return errors.New("activity can not update")
+			return errors.New("todo can not update")
 		}
 		return err
 	}
