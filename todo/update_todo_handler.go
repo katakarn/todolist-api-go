@@ -5,35 +5,49 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type updateTodoHandlerFn func(context.Context, Todo) error
+type updateTodoByIdFieldHandlerFn func(context.Context, Todo) error
 
-func (fn updateTodoHandlerFn) UpdateTodoById(ctx context.Context, todo Todo) error {
+func (fn updateTodoByIdFieldHandlerFn) UpdateTodoByIdField(ctx context.Context, todo Todo) error {
 	return fn(ctx, todo)
 }
 
-func UpdateTodoHandler(svc updateTodoHandlerFn) echo.HandlerFunc {
+func UpdateTodoByIdFieldHandler(svc updateTodoByIdFieldHandlerFn) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var todo Todo
+		todo := Todo{}
 		if err := c.Bind(&todo); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		if err := svc.UpdateTodoById(c.Request().Context(), todo); err != nil {
+		if err := svc.UpdateTodoByIdField(c.Request().Context(), todo); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, todo)
 	}
 }
 
-// func UpdateTodoHandler(svc updateTodoHandlerFn) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		todoId := c.Param("todo")
+type updateTodoByIdParamHandlerFn func(context.Context, primitive.ObjectID, Todo) error
 
-// 		err := svc.UpdateTodoById(c.Request().Context(), todoId, &Todo{})
-// 		if err != nil {
-// 			return c.String(http.StatusBadRequest, err.Error())
-// 		}
-// 		return c.JSON(http.StatusOK, "updated")
-// 	}
-// }
+func (fn updateTodoByIdParamHandlerFn) UpdateTodoByIdParam(ctx context.Context, objectId primitive.ObjectID, todo Todo) error {
+	return fn(ctx, objectId, todo)
+}
+
+func UpdateTodoByIdParamHandler(svc updateTodoByIdParamHandlerFn) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		todo := Todo{}
+		todoId := c.Param("todo")
+		objectId, err := primitive.ObjectIDFromHex(todoId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		if err := c.Bind(&todo); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		err = svc.UpdateTodoByIdParam(c.Request().Context(), objectId, todo)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		return c.JSON(http.StatusOK, todo)
+	}
+}

@@ -73,7 +73,10 @@ func main() {
 	e.GET("/todos/:todo", todo.GetTodoByIdHandler(todo.GetTodoById(mongodb)))
 	e.GET("/todos", todo.GetAllTodoHandler(todo.GetAllTodo(mongodb)))
 	e.POST("/todos", todo.CreateTodoHandler(todo.CreateTodo(mongodb)))
-	e.PUT("/todos", todo.UpdateTodoHandler(todo.UpdateTodoById(mongodb)))
+	e.PUT("/todos", todo.UpdateTodoByIdFieldHandler(todo.UpdateTodoByIdField(mongodb)))
+	// e.PUT("/todos/:todo", todo.UpdateTodoByIdParamHandler(todo.UpdateTodoByIdParam(mongodb)))
+	e.PATCH("/todos/:todo", todo.UpdateTodoByIdParamHandler(todo.UpdateTodoByIdParam(mongodb)))
+	e.DELETE("/todos/:todo", todo.DeleteTodoByIdHandler(todo.DeleteTodoById(mongodb)))
 
 	e.GET("/todos/test", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
